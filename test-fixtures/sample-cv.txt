@@ -1,0 +1,39 @@
+JORDAN RIVERA
+Data Analyst
+jordan.rivera@example.com | +1 (416) 555-0142 | Toronto, ON | linkedin.com/in/jordanrivera | github.com/jrivera
+
+SUMMARY
+Analyst with four years of experience turning messy operational data into dashboards and decisions for retail and logistics teams.
+
+PROFESSIONAL EXPERIENCE
+Data Analyst | Northwind Logistics | Toronto, ON
+Mar 2022 – Present
+• Built weekly delivery performance dashboards used by 40 regional managers
+• Automated carrier invoice reconciliation, cutting manual review time by 60%
+• Partnered with operations leads to define on-time delivery metrics
+Junior Analyst | Maple Retail Group | Mississauga, ON
+Jun 2020 – Feb 2022
+• Cleaned and merged point-of-sale data from 120 stores
+• Produced monthly sales reports for the merchandising team
+
+PROJECTS
+Transit Delay Explorer | Personal project
+Jan 2023 – Apr 2023
+• Mapped five years of open transit delay data to find the worst-performing routes
+
+LEADERSHIP EXPERIENCE
+Volunteer Coordinator | Code for Toronto
+Sep 2021 – Present
+• Organize monthly data-for-good meetups for 50+ members
+
+EDUCATION
+Bachelor of Commerce, Business Analytics | University of Toronto | Toronto, ON
+Sep 2016 – May 2020
+
+SKILLS
+Languages: SQL, Python, R
+Tools: Excel, Tableau, Git
+
+CERTIFICATIONS
+Google Data Analytics Certificate | Google
+Aug 2021

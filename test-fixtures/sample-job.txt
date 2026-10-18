@@ -1,0 +1,17 @@
+Senior Data Analyst – Supply Chain
+
+We are looking for a Senior Data Analyst to join our supply chain analytics team. You will partner with stakeholders across operations and finance to build reporting, forecast demand and improve process efficiency.
+
+What you'll do
+- Design and maintain dashboards in Power BI and Tableau
+- Write complex SQL queries against our Snowflake data warehouse
+- Build demand forecasting models in Python
+- Lead A/B testing and statistical analysis for operational changes
+- Communicate insights to senior stakeholders
+
+What we're looking for
+- 4+ years of experience in data analysis, ideally in supply chain or logistics
+- Strong SQL and Python skills; experience with dbt is a plus
+- Experience with ETL pipelines and data modeling
+- Excellent communication and stakeholder management skills
+- Familiarity with Agile ways of working

@@ -5,14 +5,17 @@ import type { DateMode, Section } from '../../types';
 import { ChipInput } from '../ChipInput';
 import { ChevronIcon, EyeIcon, EyeOffIcon, PlusIcon, TrashIcon } from '../icons';
 import { EntryEditor } from './EntryEditor';
+import { MoveButtons } from './MoveButtons';
 import { SortableItem, SortableList } from './Sortable';
 
 interface Props {
   section: Section;
   handle: ReactNode;
+  onUp?: () => void;
+  onDown?: () => void;
 }
 
-export function SectionCard({ section, handle }: Props) {
+export function SectionCard({ section, handle, onUp, onDown }: Props) {
   const [open, setOpen] = useState(true);
   const update = useProfile((s) => s.updateSection);
   const remove = useProfile((s) => s.removeSection);
@@ -26,7 +29,11 @@ export function SectionCard({ section, handle }: Props) {
   };
 
   return (
-    <section className={`card section-card${section.visible ? '' : ' is-hidden'}`} data-section-id={section.id}>
+    <section
+      className={`card section-card${section.visible ? '' : ' is-hidden'}`}
+      id={`section-${section.id}`}
+      aria-label={section.title || meta.label}
+    >
       <div className="card-head">
         {handle}
         <input
@@ -35,28 +42,35 @@ export function SectionCard({ section, handle }: Props) {
           onChange={(e) => update(section.id, { title: e.target.value })}
           aria-label="Section title"
         />
-        <span className="badge">{meta.label}</span>
+        {!section.visible && <span className="hidden-note">Hidden from CV</span>}
         <div className="card-actions">
+          <MoveButtons name={`${section.title} section`} onUp={onUp} onDown={onDown} />
           <button
             type="button"
             className="icon-btn"
             onClick={() => update(section.id, { visible: !section.visible })}
             aria-pressed={!section.visible}
-            aria-label={section.visible ? 'Hide from CV' : 'Show on CV'}
-            title={section.visible ? 'Shown on CV, click to hide' : 'Hidden from CV, click to show'}
+            aria-label={section.visible ? `Hide ${section.title} from CV` : `Show ${section.title} on CV`}
+            title={section.visible ? 'Shown on CV. Click to hide.' : 'Hidden from CV. Click to show.'}
           >
             {section.visible ? <EyeIcon /> : <EyeOffIcon />}
           </button>
-          <button type="button" className="icon-btn danger" onClick={onDelete} aria-label="Delete section" title="Delete section">
+          <button
+            type="button"
+            className="icon-btn danger"
+            onClick={onDelete}
+            aria-label={`Delete ${section.title} section`}
+            title="Delete section"
+          >
             <TrashIcon />
           </button>
           <button
             type="button"
-            className={`icon-btn chevron${open ? ' open' : ''}`}
+            className="icon-btn chevron"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
             aria-controls={bodyId}
-            aria-label={open ? 'Collapse section' : 'Expand section'}
+            aria-label={`${open ? 'Collapse' : 'Expand'} ${section.title}`}
           >
             <ChevronIcon />
           </button>
@@ -100,6 +114,7 @@ export function SectionCard({ section, handle }: Props) {
           {meta.kind === 'skills' && (
             <ChipInput
               items={section.skills}
+              label="Add skills"
               placeholder="Add skills, separated by commas"
               addLabel="Add"
               onAdd={(vals) => {
@@ -107,23 +122,42 @@ export function SectionCard({ section, handle }: Props) {
                 update(section.id, { skills: [...section.skills, ...vals.filter((v) => !have.has(v.toLowerCase()))] });
               }}
               onRemove={(v) => update(section.id, { skills: section.skills.filter((s) => s !== v) })}
+              empty="No skills yet. Add them here or push keywords from a job description."
             />
           )}
 
           {meta.kind === 'entries' && (
             <>
-              <SortableList ids={section.entries.map((e) => e.id)} onMove={(a, b) => reorderEntries(section.id, a, b)}>
+              <SortableList
+                ids={section.entries.map((e) => e.id)}
+                onMove={(a, b) => reorderEntries(section.id, a, b)}
+                nameOf={(id) => section.entries.find((e) => e.id === id)?.title || 'item'}
+              >
                 <div className="entries">
-                  {section.entries.map((entry) => (
+                  {section.entries.map((entry, i) => (
                     <SortableItem key={entry.id} id={entry.id} handleLabel={`Reorder ${entry.title || 'item'}`}>
-                      {(h) => <EntryEditor section={section} entry={entry} handle={h} />}
+                      {(h) => (
+                        <EntryEditor
+                          section={section}
+                          entry={entry}
+                          handle={h}
+                          onUp={i > 0 ? () => reorderEntries(section.id, entry.id, section.entries[i - 1].id) : undefined}
+                          onDown={
+                            i < section.entries.length - 1
+                              ? () => reorderEntries(section.id, entry.id, section.entries[i + 1].id)
+                              : undefined
+                          }
+                        />
+                      )}
                     </SortableItem>
                   ))}
                 </div>
               </SortableList>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => addEntry(section.id)}>
-                <PlusIcon /> Add {meta.titleLabel.toLowerCase()}
-              </button>
+              <div>
+                <button type="button" className="btn btn-quiet btn-sm" onClick={() => addEntry(section.id)}>
+                  <PlusIcon /> Add {meta.titleLabel.toLowerCase()}
+                </button>
+              </div>
             </>
           )}
         </div>

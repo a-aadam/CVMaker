@@ -49,30 +49,35 @@ export function GeneratorTab() {
 
   return (
     <div className="page gen-layout">
-      <div className="gen-left">
+      <div>
         <div className="page-head">
           <h2>Profile details</h2>
-          <span className="muted small">Synced with My Profile. Drag ⋮⋮ to reorder.</span>
+          <span className="muted small">Synced with My Profile. Reorder the CV by dragging a card's handle or with its up and down arrows.</span>
         </div>
         <ProfileEditor />
       </div>
-      <aside className="gen-right" aria-label="CV preview">
-        <div className="gen-right-inner">
-          <div className="row-between">
-            <h2>CV preview</h2>
-            <label className="field inline">
+      <aside className="gen-right" aria-labelledby="preview-h">
+        <section className="card preview-card">
+          <div className="card-head">
+            <h2 id="preview-h" className="card-title-static">
+              CV preview
+            </h2>
+            <label className="field inline small">
               <span className="sr-only">Page size</span>
-              <select value={size} onChange={(e) => onSize(e.target.value as Size)}>
+              <select value={size} onChange={(e) => onSize(e.target.value as Size)} aria-label="Page size">
                 <option value="A4">A4</option>
                 <option value="LETTER">US Letter</option>
               </select>
             </label>
           </div>
-          <CvPreview profile={profile} size={size} />
-          <button type="button" className="btn btn-primary btn-block" onClick={download} disabled={downloading}>
-            <DownloadIcon /> {downloading ? 'Preparing PDF…' : 'Download PDF'}
-          </button>
-        </div>
+          <div className="card-body">
+            <CvPreview profile={profile} size={size} />
+            <button type="button" className="btn btn-primary btn-lg btn-block" onClick={download} disabled={downloading}>
+              {downloading ? <span className="spinner" aria-hidden /> : <DownloadIcon />}
+              {downloading ? 'Preparing PDF…' : 'Download PDF'}
+            </button>
+          </div>
+        </section>
       </aside>
     </div>
   );

@@ -14,13 +14,15 @@ export function AddSectionModal({ existing, onPick, onClose }: Props) {
       <ul className="section-choices">
         {SECTION_ORDER.map((t) => {
           const m = SECTION_META[t];
-          const has = existing.includes(t);
+          const count = existing.filter((x) => x === t).length;
           return (
             <li key={t}>
               <button type="button" className="choice" onClick={() => onPick(t)}>
                 <strong>{m.label}</strong>
-                <span>{m.description}</span>
-                {has && <em className="choice-note">Already added. This adds another.</em>}
+                <span className="desc">
+                  {m.description}
+                  {count > 0 && ` · ${count} already in your CV`}
+                </span>
               </button>
             </li>
           );

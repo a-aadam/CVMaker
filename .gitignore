@@ -3,3 +3,9 @@ dist
 *.local
 .DS_Store
 .claude
+# Impeccable working files (local review captures, decision mocks, question logs)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/decision/
+.impeccable/questions/
+*.tsbuildinfo

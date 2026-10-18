@@ -60,9 +60,14 @@ export function CvPreview({ profile, size }: { profile: Profile; size: 'A4' | 'L
   }, [profile, size]);
 
   return (
-    <div className="preview" aria-live="polite" aria-busy={state === 'rendering'}>
-      <div className="preview-meta small muted">
-        {state === 'rendering' ? 'Updating preview…' : state === 'error' ? 'Preview failed to render.' : `${pages} page${pages === 1 ? '' : 's'}`}
+    <div className="preview" aria-busy={state === 'rendering'}>
+      <div className="preview-meta" role="status">
+        {state === 'rendering' && <span className="spinner" aria-hidden />}
+        {state === 'rendering'
+          ? 'Updating preview…'
+          : state === 'error'
+            ? "The preview couldn't be drawn. Your PDF download still works."
+            : `${pages} page${pages === 1 ? '' : 's'} · read-only preview`}
       </div>
       <div className="preview-pages" ref={host} />
     </div>

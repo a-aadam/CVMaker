@@ -16,16 +16,27 @@ export function ProfileEditor() {
   return (
     <div className="editor">
       <PersonalInfoForm />
-      <SortableList ids={sections.map((s) => s.id)} onMove={reorder}>
+      <SortableList
+        ids={sections.map((s) => s.id)}
+        onMove={reorder}
+        nameOf={(id) => sections.find((s) => s.id === id)?.title ?? 'section'}
+      >
         <div className="section-list">
-          {sections.map((s) => (
+          {sections.map((s, i) => (
             <SortableItem key={s.id} id={s.id} handleLabel={`Reorder ${s.title} section`}>
-              {(h) => <SectionCard section={s} handle={h} />}
+              {(h) => (
+                <SectionCard
+                  section={s}
+                  handle={h}
+                  onUp={i > 0 ? () => reorder(s.id, sections[i - 1].id) : undefined}
+                  onDown={i < sections.length - 1 ? () => reorder(s.id, sections[i + 1].id) : undefined}
+                />
+              )}
             </SortableItem>
           ))}
         </div>
       </SortableList>
-      <button type="button" className="btn btn-dashed" onClick={() => setAdding(true)}>
+      <button type="button" className="btn btn-file" onClick={() => setAdding(true)}>
         <PlusIcon /> Add another section
       </button>
       {adding && (
@@ -35,9 +46,11 @@ export function ProfileEditor() {
           onPick={(t) => {
             const id = addSection(t);
             setAdding(false);
-            requestAnimationFrame(() =>
-              document.querySelector(`[data-section-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
-            );
+            requestAnimationFrame(() => {
+              const el = document.getElementById(`section-${id}`);
+              el?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+              el?.querySelector<HTMLInputElement>('.card-title')?.focus({ preventScroll: true });
+            });
           }}
         />
       )}

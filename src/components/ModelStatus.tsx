@@ -1,31 +1,44 @@
 import { loadEngine, useAi } from '../ai/engine';
-import { SparkIcon } from './icons';
+import { ShieldIcon } from './icons';
 
 export function ModelStatus() {
   const { status, enabled, progress, message, setEnabled } = useAi();
 
   let label: string;
+  let short: string;
   let tone = '';
-  if (!enabled) label = 'AI off, using rules';
-  else if (status === 'checking') label = 'Checking device…';
+  if (!enabled) [label, short] = ['AI off · rules only', 'AI off'];
+  else if (status === 'checking') [label, short] = ['Checking device…', 'AI…'];
   else if (status === 'unsupported') {
-    label = 'AI unavailable, using rules';
+    [label, short] = ['AI unavailable · rules only', 'No AI'];
     tone = 'warn';
-  } else if (status === 'idle') label = 'AI not loaded';
-  else if (status === 'loading') label = `Loading AI ${Math.round(progress * 100)}%`;
-  else if (status === 'ready') {
-    label = 'AI ready';
+  } else if (status === 'idle') [label, short] = ['AI not loaded', 'AI idle'];
+  else if (status === 'loading') {
+    [label, short] = [`Loading AI ${Math.round(progress * 100)}%`, `AI ${Math.round(progress * 100)}%`];
+    tone = 'loading';
+  } else if (status === 'ready') {
+    [label, short] = ['On-device AI ready', 'AI ready'];
     tone = 'ok';
   } else {
-    label = 'AI failed, using rules';
+    [label, short] = ['AI failed · rules only', 'AI failed'];
     tone = 'warn';
   }
 
   return (
-    <div className="model-status">
-      <span className={`pill ${tone}`} title={message || undefined}>
-        <SparkIcon />
-        {label}
+    <div className={`model-status${enabled ? '' : ' ai-off'}`}>
+      <span className="privacy" title="Your CV, job descriptions and the AI model stay in this browser">
+        <ShieldIcon />
+        <span className="privacy-long">On-device · nothing leaves this browser</span>
+        <span className="privacy-short">Private · on-device</span>
+        <span className="privacy-tiny">Private</span>
+      </span>
+      <span className="divider" aria-hidden />
+      <span className="status-text" title={message || undefined} role="status">
+        <span className={`status-dot ${tone}`} aria-hidden />
+        <span className="status-label">{label}</span>
+        <span className="status-short" aria-hidden>
+          {short}
+        </span>
       </span>
       {status === 'loading' && (
         <progress className="model-progress" value={progress} max={1} aria-label="AI model download progress" />
@@ -33,17 +46,20 @@ export function ModelStatus() {
       {enabled && (status === 'idle' || status === 'error') && (
         <button
           type="button"
-          className="btn btn-ghost btn-sm"
+          className="shell-btn"
           onClick={() => loadEngine().catch(() => {})}
-          title="About 300 MB, downloaded once and cached in your browser"
+          title="About 280 MB, downloaded once and cached in this browser"
         >
-          Load now
+          Load AI
         </button>
       )}
       {status !== 'unsupported' && (
-        <label className="check small" title="Turn the on-device AI on or off">
+        <label className="switch" title="Turn the on-device AI on or off">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-          Use AI
+          <span className="switch-label" aria-hidden>
+            Use AI
+          </span>
+          <span className="sr-only">Use on-device AI</span>
         </label>
       )}
     </div>

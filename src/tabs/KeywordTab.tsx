@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { aiAvailable } from '../ai/engine';
 import { containsTerm } from '../ai/grounding';
 import { ChipInput } from '../components/ChipInput';
-import { CheckIcon, LockIcon, SparkIcon } from '../components/icons';
+import { CheckIcon, InfoIcon, LockIcon, SparkIcon } from '../components/icons';
 import { ReviewChangesModal } from '../components/ReviewChangesModal';
 import { extractKeywordsRules } from '../keywords/ruleExtractor';
 import { planPush } from '../keywords/pushPlanner';
@@ -78,92 +78,130 @@ export function KeywordTab({ onDone }: { onDone: () => void }) {
     }
   };
 
+  const waiting = !locked && jobText.trim().length >= 30;
+  const statusText = locked
+    ? status === 'reading'
+      ? aiNote || 'Reading the job description…'
+      : 'Finished reading. Start over to paste a different job.'
+    : waiting
+      ? 'Reading starts 2 seconds after you stop typing…'
+      : 'Paste a job description to begin.';
+
   return (
     <div className="page">
       <div className="kw-layout">
-        <section className="card kw-input" aria-labelledby="jd-h">
+        <section className="card kw-pane" aria-labelledby="jd-h">
           <div className="card-head">
-            <h2 id="jd-h" className="card-title-static">Paste job description here</h2>
+            <h2 id="jd-h" className="card-title-static">
+              Job description
+            </h2>
             {locked && (
-              <span className="pill">
+              <span className="lock-tag">
                 <LockIcon /> Locked
               </span>
             )}
           </div>
-          <textarea
-            className="jd"
-            value={jobText}
-            readOnly={locked}
-            aria-readonly={locked}
-            onChange={(e) => setJobText(e.target.value)}
-            placeholder="Paste the full job posting. Reading starts 2 seconds after you stop typing, and the text locks once reading begins."
-          />
-          <div className="row-between">
-            <span className="muted small">
-              {locked
-                ? status === 'reading'
-                  ? 'Reading…'
-                  : 'Finished reading. Start over to paste a different job.'
-                : jobText.trim().length >= 30
-                  ? 'Reading starts in a moment…'
-                  : 'Waiting for a job description'}
-            </span>
-            {(locked || jobText) && (
-              <button type="button" className="btn btn-ghost btn-sm" onClick={startOver}>
-                New job description
-              </button>
-            )}
+          <div className="card-body">
+            <label htmlFor="jd" className="sr-only">
+              Paste the job description
+            </label>
+            <textarea
+              id="jd"
+              className="jd"
+              value={jobText}
+              readOnly={locked}
+              aria-describedby="jd-status"
+              onChange={(e) => setJobText(e.target.value)}
+              placeholder="Paste the full job posting here. Reading starts 2 seconds after you stop typing, and the text locks while it's read."
+            />
+            {/* The 2-second wait, made visible: restarts on every keystroke. */}
+            <div className="read-timer" aria-hidden>
+              {waiting && <i key={`${jobText.length}:${jobText.slice(-12)}`} />}
+            </div>
+            <div className="status-row">
+              <span id="jd-status" className="status-text" role="status">
+                {status === 'reading' && <span className="spinner" aria-hidden />}
+                {statusText}
+              </span>
+              {(locked || jobText) && (
+                <button type="button" className="btn btn-sm" onClick={startOver}>
+                  New job description
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
-        <section className="card kw-output" aria-labelledby="kw-h" aria-busy={status === 'reading'}>
+        <section className="card kw-pane" aria-labelledby="kw-h" aria-busy={status === 'reading'}>
           <div className="card-head">
-            <h2 id="kw-h" className="card-title-static">Extracted ATS keywords</h2>
+            <h2 id="kw-h" className="card-title-static">
+              ATS keywords
+            </h2>
             {keywords.length > 0 && (
-              <span className="muted small">
-                {keywords.length - missingCount} of {keywords.length} already in your CV
+              <span className="kw-count">
+                {keywords.length - missingCount} of {keywords.length} in your CV
               </span>
             )}
           </div>
-          {status === 'reading' && <p className="notice info">{aiNote || 'Finding keywords…'}</p>}
-          {status === 'done' && aiNote && <p className="notice info">{aiNote}</p>}
-          {!keywords.length && status !== 'reading' && (
-            <p className="muted">Keywords from the job description will appear here. You can also add your own.</p>
-          )}
-          <ChipInput
-            items={keywords.map((k) => k.text)}
-            placeholder="Add keyword"
-            addLabel="Add keyword"
-            onAdd={(vals) => addKeywords(vals.map((text) => ({ text, source: 'manual' as const })))}
-            onRemove={removeKeyword}
-            chipClass={(v) => (inCv(v) ? 'chip-ok' : 'chip-missing')}
-            renderChip={(v) => (
-              <span title={inCv(v) ? 'Already in your CV' : 'Not in your CV yet'}>
-                {inCv(v) && <CheckIcon width={12} height={12} />} {v}
-              </span>
+          <div className="card-body">
+            {status === 'done' && aiNote && (
+              <p className="notice info">
+                <InfoIcon />
+                <span>{aiNote}</span>
+              </p>
             )}
-          />
-          <div className="legend small muted">
-            <span><i className="dot ok" /> In your CV</span>
-            <span><i className="dot missing" /> Missing</span>
+            {!keywords.length && status !== 'reading' && (
+              <p className="empty">Keywords from the job description are filed here. You can also add your own below.</p>
+            )}
+            <ChipInput
+              items={keywords.map((k) => k.text)}
+              label="Add a keyword"
+              placeholder="Add a keyword"
+              addLabel="Add keyword"
+              onAdd={(vals) => addKeywords(vals.map((text) => ({ text, source: 'manual' as const })))}
+              onRemove={removeKeyword}
+              chipClass={(v) => (inCv(v) ? 'chip-ok' : 'chip-missing')}
+              renderChip={(v) => (
+                <span className="chip-text">
+                  {inCv(v) && <CheckIcon width={13} height={13} />}
+                  {v}
+                  <span className="sr-only">{inCv(v) ? ', already in your CV' : ', missing from your CV'}</span>
+                </span>
+              )}
+            />
+            {keywords.length > 0 && (
+              <div className="legend">
+                <span>
+                  <i className="swatch ok" aria-hidden /> In your CV
+                </span>
+                <span>
+                  <i className="swatch missing" aria-hidden /> Missing, will be suggested
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              className="btn btn-primary btn-lg btn-block"
+              disabled={!keywords.length || !!planning || status === 'reading'}
+              onClick={onPush}
+            >
+              {planning ? <span className="spinner" aria-hidden /> : <SparkIcon />}
+              {planning || 'Push keywords to my CV'}
+            </button>
+            {review && review.length === 0 && (
+              <p className="notice ok" role="status">
+                <CheckIcon />
+                <span>Every keyword is already in your CV. Nothing to change.</span>
+              </p>
+            )}
           </div>
-          <button
-            type="button"
-            className="btn btn-primary btn-block"
-            disabled={!keywords.length || !!planning || status === 'reading'}
-            onClick={onPush}
-          >
-            <SparkIcon /> {planning || 'Push keywords to my CV'}
-          </button>
-          {review && review.length === 0 && (
-            <p className="notice ok">Every keyword is already in your CV. Nothing to change.</p>
-          )}
         </section>
       </div>
 
       {review && review.length > 0 && (
         <ReviewChangesModal
           changes={review}
+          keywords={keywords.map((k) => k.text)}
           profile={{ personal, sections }}
           onClose={() => setReview(null)}
           onApply={(accepted) => {

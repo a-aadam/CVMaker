@@ -2,7 +2,7 @@
 
 A CV builder that runs entirely in your browser. Upload your existing CV, tailor it to a job description with on-device AI, and download an ATS-friendly PDF. Nothing is uploaded to a server: your CV, job descriptions and the AI model all stay on your device.
 
-**Live app:** https://alexoree.github.io/CVMaker/
+**Live app:** https://a-aadam.github.io/CVMaker/
 
 ## Features
 
